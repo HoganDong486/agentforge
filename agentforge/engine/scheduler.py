@@ -53,12 +53,14 @@ class Scheduler:
                         if attempt == self.config.retry_count:
                             node.status = NodeStatus.FAILED
                         else:
+                            node.status = NodeStatus.PENDING
                             await asyncio.sleep(self.config.retry_delay * (attempt + 1))
                     except Exception as e:
                         node.error = str(e)
                         if attempt == self.config.retry_count:
                             node.status = NodeStatus.FAILED
                         else:
+                            node.status = NodeStatus.PENDING
                             await asyncio.sleep(self.config.retry_delay * (attempt + 1))
 
                 for cb in self._callbacks.get(node.id, []):

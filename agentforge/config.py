@@ -6,7 +6,7 @@ from typing import Optional
 
 @dataclass
 class Config:
-    openai_api_key: str = field(default_factory=lambda: os.environ.get("OPENAI_API_KEY", ""))
+    openai_api_key: str = field(default_factory=lambda: os.environ.get("OPENAI_API_KEY", ""), repr=False)
     openai_base_url: Optional[str] = field(default_factory=lambda: os.environ.get("OPENAI_BASE_URL"))
     llm_model: str = field(default_factory=lambda: os.environ.get("AGENTFORGE_MODEL", "gpt-4o-mini"))
     embedding_model: str = field(default_factory=lambda: os.environ.get("AGENTFORGE_EMBEDDING", "text-embedding-3-small"))

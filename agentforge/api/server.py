@@ -17,7 +17,7 @@ from agentforge.memory.compressor import ContextCompressor
 from agentforge.evaluation.judge import Evaluator
 
 app = FastAPI(title="AgentForge API", version="1.0.0")
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["GET", "POST"], allow_headers=["Content-Type", "Authorization"])
 
 _executor = WorkflowExecutor()
 _registry = AgentRegistry()
@@ -67,12 +67,11 @@ def list_agents():
 
 
 @app.post("/agents/run")
-def run_agent(req: AgentRunRequest):
+async def run_agent(req: AgentRunRequest):
     agent = _registry.get(req.agent_name or "default")
     if not agent:
         raise HTTPException(404, f"Agent '{req.agent_name}' not found")
-    import asyncio
-    output = asyncio.run(agent.run({"message": req.message, "context": req.context}))
+    output = await agent.run({"message": req.message, "context": req.context})
     return {"agent": req.agent_name, "output": output}
 
 
@@ -82,9 +81,10 @@ def list_tools():
 
 
 @app.post("/tools/{tool_name}")
-def execute_tool(tool_name: str, args: dict = {}):
-    import asyncio
-    result = asyncio.run(_tools.execute(tool_name, args))
+async def execute_tool(tool_name: str, args: dict = None):
+    if args is None:
+        args = {}
+    result = await _tools.execute(tool_name, args)
     return {"tool": tool_name, "result": result}
 
 
@@ -101,9 +101,9 @@ def list_mcp():
 
 
 @app.post("/workflows/run")
-def run_workflow(req: WorkflowRunRequest):
+async def run_workflow(req: WorkflowRunRequest):
     workflow = Workflow.from_dict(req.workflow)
-    result = _executor.execute(workflow, req.inputs)
+    result = await _executor.execute_async(workflow, req.inputs)
     return {"workflow_id": workflow.id, "result": result}
 
 

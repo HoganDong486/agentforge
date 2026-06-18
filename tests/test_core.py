@@ -1,6 +1,7 @@
 """AgentForge test suite."""
 import json
 import unittest
+from pathlib import Path
 from agentforge.engine.node import Node, NodeConfig, NodeType, NodeStatus, Workflow
 from agentforge.engine.executor import WorkflowExecutor
 from agentforge.agents.registry import AgentRegistry
@@ -82,7 +83,15 @@ class TestRegistry(unittest.TestCase):
 class TestBuiltinTools(unittest.TestCase):
     def setUp(self):
         import os
-        self.test_path = os.path.join(os.path.dirname(__file__), "_test_temp_file.txt")
+        from agentforge.tools.builtin_tools import DEFAULT_ROOT
+        Path(DEFAULT_ROOT).mkdir(parents=True, exist_ok=True)
+        self.test_path = "test_temp_file.txt"
+
+    def tearDown(self):
+        from agentforge.tools.builtin_tools import DEFAULT_ROOT
+        fp = Path(DEFAULT_ROOT) / self.test_path
+        if fp.exists():
+            fp.unlink()
 
     def test_read_file(self):
         from agentforge.tools.builtin_tools import read_file, write_file
@@ -91,7 +100,8 @@ class TestBuiltinTools(unittest.TestCase):
         self.assertIn("hello", content)
 
     def test_list_files(self):
-        from agentforge.tools.builtin_tools import list_files
+        from agentforge.tools.builtin_tools import list_files, write_file
+        write_file({"path": self.test_path, "content": "test"})
         entries = list_files({"path": "."})
         self.assertGreater(len(entries), 0)
 
