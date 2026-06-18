@@ -1,7 +1,7 @@
 """AgentForge test suite."""
 import json
 import unittest
-from agentforge.engine.node import Node, NodeConfig, NodeType, Workflow
+from agentforge.engine.node import Node, NodeConfig, NodeType, NodeStatus, Workflow
 from agentforge.engine.executor import WorkflowExecutor
 from agentforge.agents.registry import AgentRegistry
 from agentforge.agents.base import AgentConfig
@@ -18,9 +18,9 @@ class TestNode(unittest.TestCase):
 
     def test_node_status_lifecycle(self):
         n = Node(id="n1", name="Test", node_type=NodeType.AGENT)
-        n.status = NodeStatus.__members__["RUNNING"]
+        n.status = NodeStatus.RUNNING
         self.assertEqual(n.status.value, "running")
-        n.status = NodeStatus.__members__["SUCCESS"]
+        n.status = NodeStatus.SUCCESS
         n.output = "done"
         self.assertEqual(n.status.value, "success")
 
@@ -58,7 +58,7 @@ class TestWorkflow(unittest.TestCase):
         wf = Workflow(id="w1", name="Test", description="")
         n = Node(id="n1", name="Solo", node_type=NodeType.AGENT)
         wf.add_node(n)
-        n.status = NodeStatus.__members__["SUCCESS"]
+        n.status = NodeStatus.SUCCESS
         self.assertTrue(wf.is_complete())
 
 
